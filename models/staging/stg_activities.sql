@@ -8,7 +8,7 @@ with
             count(if(`NO` = '', null, `NO`)) over (order by id) as _grp,
             if
             (`NO` = '', null, `NO`) as null_no
-        from fact_activities fa
+        from dsls.raw_data_all_dbr fa
     ),
     final_table as (
         select
