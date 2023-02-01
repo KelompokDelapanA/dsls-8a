@@ -1,10 +1,10 @@
 WITH 
 grouped_table AS (
 	select
-		sra.*,
+		*,
 		count("NO") over ( ORDER BY id ) AS _grp
 	FROM
-		project_dev.stg_raw_activities sra
+		{{ ref(stg_raw_activities) }}
 	),
 final_table AS ( 
 	SELECT grouped_table.*, 
