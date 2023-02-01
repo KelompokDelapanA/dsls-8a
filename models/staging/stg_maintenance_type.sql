@@ -10,7 +10,7 @@ WITH maintenance_types as (
     		when sa.maintenance_type = 'RPT' then 'Repair Tyre (Tyre Leak)'
     		when sa.maintenance_type = 'WR' then 'ERROR FUEL SYSTEM'
     	else null end as maintenance_type_name
-    FROM project_dev.stg_activities as sa
+    FROM {{ ref('stg_activities') }} as sa
     GROUP BY 1
     )
 SELECT ROW_NUMBER() OVER() AS maintenance_type_id, maintenance_type, maintenance_type_name
