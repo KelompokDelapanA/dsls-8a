@@ -4,7 +4,7 @@ grouped_table AS (
 		*,
 		count("NO") over ( ORDER BY id ) AS _grp
 	FROM
-		{{ ref(stg_raw_activities) }}
+		{{ ref('stg_raw_activities') }}
 	),
 final_table AS ( 
 	SELECT grouped_table.*, 
