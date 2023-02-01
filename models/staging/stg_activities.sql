@@ -1,362 +1,182 @@
-
---- INITIAL CLEAN DATA FROM RAW DATA
-
-with
-    grouped_table as (
-        select
-            fa.*,
-            count(if(`NO` = '', null, `NO`)) over (order by id) as _grp,
-            if
-            (`NO` = '', null, `NO`) as null_no
-        from dsls.raw_data_all_dbr fa
-    ),
-    final_table as (
-        select
-            grouped_table.*,
-            first_value(null_no) over (partition by _grp order by id) as ffill_no
-        from grouped_table
-    ),
-    raw_activities as (
-        select
-            id,
-            site,
-            `MONTH`,
-            `LOKASI UNIT`,
-            trim(section) as section,
-            ffill_no as `NO`,
-            egi,
-            `CODE NUMBER UNIT`,
-            hm,
-            `PROBLEM DESCRIPTION`,
-            trim(
-                if(
-                    `PROBLEM DESCRIPTION` like '%TYRE%NO%',
-                    `PROBLEM DESCRIPTION`,
-                    upper(
-                        substring_index(
-                            substring_index(
-                                substring_index(
-                                    substring_index(`PROBLEM DESCRIPTION`, '+', 1),
-                                    ',',
-                                    1
-                                ),
-                                ',',
-                                -1
-                            ),
-                            '+',
-                            -1
-                        )
-                    )
-                )
-            ) as problem_1,
-            trim(
-                if(
-                    `PROBLEM DESCRIPTION` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(
-                                substring_index(
-                                    substring_index(`PROBLEM DESCRIPTION`, '+', 2),
-                                    ',',
-                                    2
-                                ),
-                                ',',
-                                -1
-                            ),
-                            '+',
-                            -1
-                        )
-                    )
-                )
-            ) as problem_2,
-            trim(
-                if(
-                    `PROBLEM DESCRIPTION` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(
-                                substring_index(
-                                    substring_index(`PROBLEM DESCRIPTION`, '+', 3),
-                                    ',',
-                                    3
-                                ),
-                                ',',
-                                -1
-                            ),
-                            '+',
-                            -1
-                        )
-                    )
-                )
-            ) as problem_3,
-            `START B/D (DATE)`,
-            `START B/D (TIME)`,
-            if(
-                `WO NUMBER` = '300500023435',
-                `START B/D (DATE)`,
-                # # ADD COLUMN START B/D DATE
-                concat(`START B/D (DATE)`, ' ', `START B/D (TIME)`)
-            ) as `START B/D`,
-            `WO NUMBER`,
-            `WO / BD TYPE`,
-            `MAINTENANCE TYPE`,
-            `STATUS UNIT`,
-            `ACTION PROBLEM`,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    `ACTION PROBLEM`,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 1), ',', -1
-                        )
-                    )
-                )
-            ) as action_1,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 2), ',', -1
-                        )
-                    )
-                )
-            ) as action_2,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 3), ',', -1
-                        )
-                    )
-                )
-            ) as action_3,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 4), ',', -1
-                        )
-                    )
-                )
-            ) as action_4,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 5), ',', -1
-                        )
-                    )
-                )
-            ) as action_5,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 6), ',', -1
-                        )
-                    )
-                )
-            ) as action_6,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 7), ',', -1
-                        )
-                    )
-                )
-            ) as action_7,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 8), ',', -1
-                        )
-                    )
-                )
-            ) as action_8,
-            trim(
-                if(
-                    `ACTION PROBLEM` like '%TYRE%NO%',
-                    null,
-                    upper(
-                        substring_index(
-                            substring_index(`ACTION PROBLEM`, ',', 9), ',', -1
-                        )
-                    )
-                )
-            ) as action_9,
-            `ACTIVITY CODE`,
-            `DESCRIPTION ACTIVITY`,
-            `START ACTIVITY (DATE)`,
-            `START ACTIVITY (TIME)`,
-            if(
-                `WO NUMBER` = '300500023435',
-                `START ACTIVITY (DATE)`,
-                # # ADD COLUMN START ACTIVITY DATE
-                concat(`START ACTIVITY (DATE)`, ' ', `START ACTIVITY (TIME)`)
-            ) as `START ACTIVITY`,
-            `FINISH ACTIVITY (DATE)`,
-            `FINISH ACTIVITY (TIME)`,
-            if(
-                `WO NUMBER` = '300500023435',
-                `FINISH ACTIVITY (DATE)`,
-                # # ADD COLUMN FINISH ACTIVITY DATE
-                concat(`FINISH ACTIVITY (DATE)`, ' ', `FINISH ACTIVITY (TIME)`)
-            ) as `FINISH ACTIVITY`,
-            `RFU (DATE)`,
-            `RFU (TIME)`,
-            if(
-                `WO NUMBER` = '300500023435',
-                `RFU (DATE)`,
-                concat(`RFU (DATE)`, ' ', `RFU (TIME)`)  # # ADD COLUMN RFU DATE
-            ) as `RFU`,
-            `AGING B/D (DAY)`,
-            `AGING B/D (HOUR)`,
-            `AGING ACTIVITY (DAY)`,
-            `AGING ACTIVITY (HOUR)`,
-            `SUB COMP CODE`,
-            `COMP CODE`,
-            trim(upper(`DESCRIPTION SUB COMP (PA)`)) as `DESCRIPTION SUB COMP (PA)`,
-            trim(upper(`DESRICTION COMP (PA)`)) as `DESRICTION COMP (PA)`,
-            trim(upper(`DESCRIPTION SUB COMP (MTBF)`)) as `DESCRIPTION SUB COMP (MTBF)`,
-            trim(upper(`DESRICTION COMP (MTBF)`)) as `DESRICTION COMP (MTBF)`,
-            `PIC MEKANIK / GROUP LEADER`,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 1), ',', -1
-                    )
-                )
-            ) as pic_1,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 2), ',', -1
-                    )
-                )
-            ) as pic_2,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 3), ',', -1
-                    )
-                )
-            ) as pic_3,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 4), ',', -1
-                    )
-                )
-            ) as pic_4,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 5), ',', -1
-                    )
-                )
-            ) as pic_5,
-            trim(
-                upper(
-                    substring_index(
-                        substring_index(`PIC MEKANIK / GROUP LEADER`, ',', 6), ',', -1
-                    )
-                )
-            ) as pic_6,
-            `RO / PR NUMBER`,
-            `RO / PR (DATE)`,
-            `RO / PR (STATUS)`,
-            `PO NUMBER`,
-            `PO (DATE)`,
-            `PO (STATUS)`,
-            `REMARK`
-        from final_table
-        where egi = 'EGI 12'  # # FILTER EGI
-    ),
-    raw_activities_ as (
-        select
-            id,
-            site,
-            `MONTH`,
-            `LOKASI UNIT` as lokasi_unit,
-            section,
-            `NO`,
-            egi,
-            `CODE NUMBER UNIT` as `CODE_NUMBER_UNIT`,
-            hm,
-            `PROBLEM DESCRIPTION` as problem_description,
-            `PROBLEM DESCRIPTION` as prob,
-            problem_1 as problem_1,
-            if(problem_1 = problem_2, null, problem_2) as problem_2,
-            if(problem_2 = problem_3, null, problem_3) as problem_3,
-            `START B/D (DATE)` as `START_BD_DATE`,
-            `START B/D (TIME)` as `START_BD_TIME`,
-            `START B/D` as `START_BD`,
-            `WO NUMBER` as `WO_NUMBER`,
-            `WO / BD TYPE` as wo_bd_type,
-            `MAINTENANCE TYPE` as maintenance_type,
-            `STATUS UNIT` as status_unit,
-            `ACTION PROBLEM` as action_problem,
-            action_1 as action_1_,
-            if(action_1 = action_2, null, action_2) as action_2_,
-            if(action_2 = action_3, null, action_3) as action_3_,
-            if(action_3 = action_4, null, action_4) as action_4_,
-            if(action_4 = action_5, null, action_5) as action_5_,
-            if(action_5 = action_6, null, action_6) as action_6_,
-            if(action_6 = action_7, null, action_7) as action_7_,
-            if(action_7 = action_8, null, action_8) as action_8_,
-            if(action_8 = action_9, null, action_9) as action_9_,
-            `ACTIVITY CODE` as activity_code,
-            `DESCRIPTION ACTIVITY` as description_activity,
-            `START ACTIVITY (DATE)` as start_activity_date,
-            `START ACTIVITY (TIME)` as start_activity_time,
-            `START ACTIVITY` as start_activity,  # # ADD COLUMN START ACTIVITY DATE
-            `FINISH ACTIVITY (DATE)` as finish_activity_date,
-            `FINISH ACTIVITY (TIME)` as finish_activity_time,
-            `FINISH ACTIVITY` as finish_activity,  # # ADD COLUMN FINISH ACTIVITY DATE
-            `RFU (DATE)` as rfu_date,
-            `RFU (TIME)` as rfu_time,
-            `RFU`,  # # ADD COLUMN RFU DATE
-            `AGING B/D (DAY)` as aging_bd_day,
-            `AGING B/D (HOUR)` as aging_bd_hour,
-            `AGING ACTIVITY (DAY)` as aging_activity_day,
-            `AGING ACTIVITY (HOUR)` as aging_activity_hour,
-            `SUB COMP CODE` as sub_comp_code,
-            `COMP CODE` as comp_code,
-            `DESCRIPTION SUB COMP (PA)` as desc_sub_comp_pa,
-            `DESRICTION COMP (PA)` as desc_comp_pa,
-            `DESCRIPTION SUB COMP (MTBF)` as desc_sub_comp_mtbf,
-            `DESRICTION COMP (MTBF)` as desc_comp_mtbf,
-            `PIC MEKANIK / GROUP LEADER` as pic,
-            pic_1 as pic_1_,
-            if(pic_1 = pic_2, null, pic_2) as pic_2_,
-            if(pic_2 = pic_3, null, pic_3) as pic_3_,
-            if(pic_3 = pic_4, null, pic_4) as pic_4_,
-            if(pic_4 = pic_5, null, pic_5) as pic_5_,
-            if(pic_5 = pic_6, null, pic_6) as pic_6_,
-            `REMARK`
-        from raw_activities
-        where `ACTIVITY CODE` is not null  # # TERDAPAT 1 NULL
-    )
-select *
-from raw_activities_
-order by start_bd, start_activity, code_number_unit
-;
+WITH 
+grouped_table AS (
+	select
+		sra.*,
+		count("NO") over ( ORDER BY id ) AS _grp
+	FROM
+		project_dev.stg_raw_activities sra
+	),
+final_table AS ( 
+	SELECT grouped_table.*, 
+				first_value("NO") 
+						over ( PARTITION BY _grp ORDER BY id ) AS ffill_NO 
+	FROM grouped_table 
+	),
+raw_activities AS (
+	SELECT
+		id,
+		SITE,
+		"MONTH",
+		"LOKASI UNIT",
+		TRIM("SECTION") AS "SECTION",
+		ffill_NO AS "NO",
+		EGI,
+		"CODE NUMBER UNIT", 
+		HM,
+		"PROBLEM DESCRIPTION",
+		TRIM(UPPER(CASE 
+			WHEN TRIM("PROBLEM DESCRIPTION") LIKE '%TYRE%NO%' or TRIM("PROBLEM DESCRIPTION") LIKE '%ADJUST%TYRE%'  or TRIM("PROBLEM DESCRIPTION") LIKE '%REP%TYRE%' then TRIM("PROBLEM DESCRIPTION")  
+			else SPLIT_PART(regexp_replace(TRIM("PROBLEM DESCRIPTION"),'[+++]',','),',',1)
+			end )) as PROBLEM_1,
+		TRIM(UPPER(CASE 
+			WHEN TRIM("PROBLEM DESCRIPTION") LIKE '%TYRE%NO%' or TRIM("PROBLEM DESCRIPTION") LIKE '%ADJUST%TYRE%'  or TRIM("PROBLEM DESCRIPTION") LIKE '%REP%TYRE%' then TRIM("PROBLEM DESCRIPTION")  
+			else SPLIT_PART(regexp_replace(TRIM("PROBLEM DESCRIPTION"),'[+++]',','),',',2)
+			end )) as PROBLEM_2,
+		TRIM(UPPER(CASE 
+			WHEN TRIM("PROBLEM DESCRIPTION") LIKE '%TYRE%NO%' or TRIM("PROBLEM DESCRIPTION") LIKE '%ADJUST%TYRE%'  or TRIM("PROBLEM DESCRIPTION") LIKE '%REP%TYRE%' then TRIM("PROBLEM DESCRIPTION")  
+			else SPLIT_PART(regexp_replace(TRIM("PROBLEM DESCRIPTION"),'[+++]',','),',',3)
+			end )) as PROBLEM_3,
+		"START B/D (DATE)",
+		"START B/D (TIME)",
+		case when "WO NUMBER" = '300500023435' then "START B/D (DATE)" ELSE
+		CONCAT("START B/D (DATE)", ' ', "START B/D (TIME)") end AS "START B/D", --ADD COLUMN START B/D DATE
+		"WO NUMBER",
+		"WO / BD TYPE",
+		"MAINTENANCE TYPE",
+		"STATUS UNIT",
+		"ACTION PROBLEM",
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM" 
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',1)
+			end )) as ACTION_1,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',2)
+			end )) as ACTION_2,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',3)
+			end )) as ACTION_3,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',4)
+		end )) as ACTION_4,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',5)
+		end )) as ACTION_5,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',6)
+		end )) as ACTION_6,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',7)
+		end )) as ACTION_7,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',8)
+		end )) as ACTION_8,
+		TRIM(UPPER(CASE 
+			WHEN "ACTION PROBLEM" LIKE '%TYRE%NO%' or "ACTION PROBLEM" LIKE '%ADJUST%TYRE%'  or "ACTION PROBLEM" LIKE '%REP%TYRE%' then "ACTION PROBLEM"  
+			else SPLIT_PART(regexp_replace("ACTION PROBLEM",'[+++]',','),',',9)
+		end )) as ACTION_9,
+		"ACTIVITY CODE",
+		"DESCRIPTION ACTIVITY",
+		"START ACTIVITY (DATE)",
+		"START ACTIVITY (TIME)",
+		case when "WO NUMBER" = '300500023435' then "START ACTIVITY (DATE)" else
+		CONCAT("START ACTIVITY (DATE)", ' ', "START ACTIVITY (TIME)") end AS "START ACTIVITY", -- ADD COLUMN START ACTIVITY DATE
+		"FINISH ACTIVITY (DATE)",
+		"FINISH ACTIVITY (TIME)",
+		case when "WO NUMBER" = '300500023435' then "FINISH ACTIVITY (DATE)" else
+		CONCAT("FINISH ACTIVITY (DATE)", ' ', "FINISH ACTIVITY (TIME)") end AS "FINISH ACTIVITY", -- ADD COLUMN FINISH ACTIVITY DATE
+		"RFU (DATE)",
+		"RFU (TIME)",
+		case when "WO NUMBER" = '300500023435' then "RFU (DATE)" else
+		CONCAT("RFU (DATE)", ' ', "RFU (TIME)") end AS "RFU", -- ADD COLUMN RFU DATE
+		"AGING B/D (DAY)",
+		"AGING B/D (HOUR)",
+		"AGING ACTIVITY (DAY)",
+		"AGING ACTIVITY (HOUR)",
+		"SUB COMP CODE",
+		"COMP CODE",
+		TRIM(UPPER("DESCRIPTION SUB COMP (PA)")) AS "DESCRIPTION SUB COMP (PA)",
+		TRIM(UPPER("DESRICTION COMP (PA)")) AS "DESRICTION COMP (PA)",
+		TRIM(UPPER("DESCRIPTION SUB COMP (MTBF)")) AS "DESCRIPTION SUB COMP (MTBF)",
+		TRIM(UPPER("DESRICTION COMP (MTBF)")) AS "DESRICTION COMP (MTBF)",
+		"PIC MEKANIK / GROUP LEADER",
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 1))) AS PIC_1,
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 2))) AS PIC_2,
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 3))) AS PIC_3,
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 4))) AS PIC_4,
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 5))) AS PIC_5,
+		TRIM(UPPER(SPLIT_PART("PIC MEKANIK / GROUP LEADER", ',', 6))) AS PIC_6,
+		"RO / PR NUMBER",
+		"RO / PR (DATE)",
+		"RO / PR (STATUS)",
+		"PO NUMBER",
+		"PO (DATE)",
+		"PO (STATUS)",
+		remark 
+	FROM
+		final_table 
+	WHERE EGI = 'EGI 12' -- FILTER EGI
+	),
+raw_activities_ AS (
+										SELECT id, SITE, "MONTH", "LOKASI UNIT" AS LOKASI_UNIT,
+										 "SECTION", "NO", EGI, "CODE NUMBER UNIT" AS CODE_NUMBER_UNIT,
+										 HM, TRIM("PROBLEM DESCRIPTION") AS PROBLEM_DESCRIPTION,PROBLEM_1 AS PROBLEM_1,
+											CASE WHEN PROBLEM_1 = PROBLEM_2 THEN NULL ELSE PROBLEM_2 END AS PROBLEM_2,
+											CASE WHEN PROBLEM_2 = PROBLEM_3 THEN NULL ELSE PROBLEM_3 END AS PROBLEM_3,
+											"START B/D (DATE)" AS START_BD_DATE,
+											"START B/D (TIME)" AS START_BD_TIME,
+											"START B/D" AS START_BD,
+											"WO NUMBER" AS WO_NUMBER,
+											"WO / BD TYPE" AS WO_BD_TYPE,
+											"MAINTENANCE TYPE" AS MAINTENANCE_TYPE,
+											"STATUS UNIT" AS STATUS_UNIT,
+											"ACTION PROBLEM" AS ACTION_PROBLEM, 
+											ACTION_1 AS ACTION_1_,
+											CASE WHEN ACTION_1 = ACTION_2 THEN NULL ELSE ACTION_2 END AS ACTION_2_,
+											CASE WHEN ACTION_2 = ACTION_3 THEN NULL ELSE ACTION_3 END AS ACTION_3_,
+											CASE WHEN ACTION_3 = ACTION_4 THEN NULL ELSE ACTION_4 END AS ACTION_4_,
+											CASE WHEN ACTION_4 = ACTION_5 THEN NULL ELSE ACTION_5 END AS ACTION_5_,
+											CASE WHEN ACTION_5 = ACTION_6 THEN NULL ELSE ACTION_6 END AS ACTION_6_,
+											CASE WHEN ACTION_6 = ACTION_7 THEN NULL ELSE ACTION_7 END AS ACTION_7_,
+											CASE WHEN ACTION_7 = ACTION_8 THEN NULL ELSE ACTION_8 END AS ACTION_8_,
+											CASE WHEN ACTION_8 = ACTION_9 THEN NULL ELSE ACTION_9 END AS ACTION_9_,
+												"ACTIVITY CODE" AS ACTIVITY_CODE,
+												"DESCRIPTION ACTIVITY" AS DESCRIPTION_ACTIVITY,
+												"START ACTIVITY (DATE)" AS START_ACTIVITY_DATE,
+												"START ACTIVITY (TIME)" AS START_ACTIVITY_TIME,
+												"START ACTIVITY" AS START_ACTIVITY, -- ADD COLUMN START ACTIVITY DATE
+												"FINISH ACTIVITY (DATE)" AS FINISH_ACTIVITY_DATE,
+												"FINISH ACTIVITY (TIME)" AS FINISH_ACTIVITY_TIME,
+												"FINISH ACTIVITY" AS FINISH_ACTIVITY, -- ADD COLUMN FINISH ACTIVITY DATE
+												"RFU (DATE)" AS RFU_DATE,
+												"RFU (TIME)"AS RFU_TIME,
+												"RFU", -- ADD COLUMN RFU DATE
+												"AGING B/D (DAY)" AS AGING_BD_DAY,
+												"AGING B/D (HOUR)" AS AGING_BD_HOUR,
+												"AGING ACTIVITY (DAY)" AS AGING_ACTIVITY_DAY,
+												"AGING ACTIVITY (HOUR)" AS AGING_ACTIVITY_HOUR,
+												"SUB COMP CODE" AS SUB_COMP_CODE,
+												"COMP CODE" AS COMP_CODE,
+												"DESCRIPTION SUB COMP (PA)" AS DESC_SUB_COMP_PA,
+												"DESRICTION COMP (PA)"AS DESC_COMP_PA,
+												"DESCRIPTION SUB COMP (MTBF)"AS DESC_SUB_COMP_MTBF,
+												"DESRICTION COMP (MTBF)"AS DESC_COMP_MTBF,
+												"PIC MEKANIK / GROUP LEADER" AS PIC,
+												PIC_1 AS PIC_1_,
+												CASE WHEN PIC_1 = PIC_2 THEN NULL ELSE PIC_2 END AS PIC_2_,
+												CASE WHEN PIC_2 = PIC_3 THEN NULL ELSE PIC_3 END AS PIC_3_,
+												CASE WHEN PIC_3 = PIC_4 THEN NULL ELSE PIC_4 END AS PIC_4_,
+												CASE WHEN PIC_4 = PIC_5 THEN NULL ELSE PIC_5 END AS PIC_5_,
+												CASE WHEN PIC_5 = PIC_6 THEN NULL ELSE PIC_6 END AS PIC_6_,
+												remark 
+										FROM raw_activities
+										WHERE "ACTIVITY CODE" IS NOT NULL -- TERDAPAT 1 NULL
+										)
+SELECT * FROM raw_activities_
+ORDER BY START_BD, START_ACTIVITY, CODE_NUMBER_UNIT
