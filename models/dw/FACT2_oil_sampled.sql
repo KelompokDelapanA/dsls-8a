@@ -10,7 +10,7 @@ with
       component,
       meter,
       meter_on_fluid,
-      fluid_changed,
+      case when fluid_changed = "Y" then 1 else 0 end as fluid_changed,
       Cu,
       Fe,
       Cr,
