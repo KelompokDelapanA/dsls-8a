@@ -46,4 +46,3 @@ with
     )
   
 select * from telematic_cun
-;
