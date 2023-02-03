@@ -4,6 +4,7 @@ with
   dbr AS (
     SELECT 
         v.id
+        ,z.site_id
         ,a.lokasi_id
         ,b.section_id
         ,c.code_unit_id
@@ -50,6 +51,7 @@ with
         ,v.AGING_ACTIVITY_HOUR
         ,v.REMARK
     FROM raw_data.raw_clean_dbr_egi12 v
+    LEFT JOIN {{ ref('DIM_site') }} AS z ON z.SITE = v.SITE
     LEFT JOIN {{ ref('DIM_location') }} AS a ON a.LOKASI_UNIT = v.LOKASI_UNIT
     LEFT JOIN {{ ref('DIM_section') }} AS b ON b.`SECTION` = v.`SECTION`
     LEFT JOIN {{ ref('DIM_code_unit_number') }} AS c ON c.code_unit_number = v.`CODE_NUMBER_UNIT`
