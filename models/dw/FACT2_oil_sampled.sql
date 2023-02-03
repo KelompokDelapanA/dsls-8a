@@ -24,17 +24,10 @@ with
     where egi = 'EGI 12'
   )
 
-  , oil_table_id as(
-    select
-      row_number() over(order by sampled_date asc) as oil_sampled_id
-      ,*
-    from oil_table
-  )
 
-, oil_health as(
+, oil_health_comp as(
     select
-        oil_sampled_id
-        ,c.code_unit_id
+        c.code_unit_id
         ,h.health_id
         ,n.comp_id
         ,sampled_date
@@ -50,12 +43,24 @@ with
         ,V100
         ,Na
         ,PQI
-    from oil_table_id o
+    from oil_table o
     left join {{ ref('DIM_code_unit_number') }} c on o.code_unit_number = c.code_unit_number
     left join {{ ref('DIM2_health') }} h on o.health = h.health
     left join {{ ref('DIM2_component') }} n on o.component = n.component
     
     )
 
+, oil_table_id as(
+    select
+      row_number() over(order by sampled_date asc) as oil_sampled_id
+      ,*
+    from oil_health_comp
+  )
 
-select * from oil_health
+, oil_table_final as(
+    select *
+    from oil_table_id
+    order by oil_sampled_id
+)
+
+select * from oil_table_id
