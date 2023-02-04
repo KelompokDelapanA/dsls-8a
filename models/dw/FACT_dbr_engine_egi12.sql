@@ -79,7 +79,7 @@ with
     LEFT JOIN {{ ref('DIM_date') }} AS dt3 ON DATE(dt3.`DATE`) = DATE(v.FINISH_ACTIVITY) 
     LEFT JOIN {{ ref('DIM_time') }} AS t3 ON TIME(t3.TIME) = TIME(v.FINISH_ACTIVITY) 
     LEFT JOIN {{ ref('DIM_date') }} AS dt4 ON DATE(dt4.`DATE`) = DATE(v.RFU) 
-    LEFT JOIN {{ ref('DIM_time') }} AS t4 ON TIME(t4.TIME) = TIME(v.RFU) 
+    LEFT JOIN {{ ref('DIM_time') }} AS t4 ON TIME(t4.TIME) = TIME(v.RFU)
     LEFT JOIN {{ ref('DIM_sub_comp') }} AS k ON k.DESC_SUB_COMP = TRIM(UPPER(v.DESC_SUB_COMP_PA))
     LEFT JOIN {{ ref('DIM_pic') }} AS p1 ON TRIM(UPPER(p1.PIC_NAME)) = TRIM(UPPER(v.PIC_1_))
     LEFT JOIN {{ ref('DIM_pic') }} AS p2 ON TRIM(UPPER(p2.PIC_NAME)) = TRIM(UPPER(v.PIC_2_))
