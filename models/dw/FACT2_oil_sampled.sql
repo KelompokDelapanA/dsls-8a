@@ -57,10 +57,4 @@ with
     from oil_health_comp
   )
 
-, oil_table_final as(
-    select *
-    from oil_table_id
-    order by oil_sampled_id
-)
-
-select * from oil_table_id
+select * from oil_table_id order by oil_sampled_id
