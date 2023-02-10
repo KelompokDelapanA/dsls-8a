@@ -20,7 +20,7 @@ with cte as (
   left join  {{ ref('DIM2_component')}} as c
     on o.comp_id = c.comp_id
   where cn.egi = 'EGI 12'
-    and c.component = 'ENGINE'
+    -- and c.component = 'ENGINE'
     and sampled_date between '2022-01-01' and '2022-12-31'
   order by sampled_date, oil_sampled_id
 )
